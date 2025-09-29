@@ -1,0 +1,13 @@
+# Visual Studio user artifacts
+/.vs
+*.csproj.user
+
+# build artifacts
+obj
+bin
+
+# Tesseract binaries
+tessdata
+x64
+x86
+Tesseract.Data.English.targets
