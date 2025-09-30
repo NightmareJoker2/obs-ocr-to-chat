@@ -39,6 +39,7 @@ namespace ObsOcrToChat
                 auth.SendRequestToBrowser(clientId);
                 AuthenticationModel authResult = await auth.GetAuthenticationValuesAsync();
                 Settings.Default.AccessToken = authResult.Token;
+                Settings.Default.Save();
 
                 Initialize();
             }
@@ -207,7 +208,7 @@ namespace ObsOcrToChat
             builder.Append(Environment.NewLine);
             builder.Append("</head>");
             builder.Append(Environment.NewLine);
-            builder.Append("<body><p>You can close this tab.</p></body>");
+            builder.Append("<body style=\"font-family: sans-serif;\">You can close this tab.</p></body>");
             builder.Append(Environment.NewLine);
             builder.Append("</html>");
 
