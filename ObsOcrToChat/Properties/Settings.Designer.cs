@@ -70,5 +70,17 @@ namespace ObsOcrToChat.Properties {
                 this["ObsWebsocketPassword"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string ObsSceneSelected {
+            get {
+                return ((string)(this["ObsSceneSelected"]));
+            }
+            set {
+                this["ObsSceneSelected"] = value;
+            }
+        }
     }
 }

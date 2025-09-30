@@ -1,5 +1,6 @@
 using ObsOcrToChat.Properties;
 using OBSWebsocketDotNet;
+using OBSWebsocketDotNet.Types;
 using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
@@ -8,6 +9,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using Tesseract;
 using TwitchLib.Client;
+using static System.Formats.Asn1.AsnWriter;
 
 namespace ObsOcrToChat
 {
@@ -103,14 +105,25 @@ namespace ObsOcrToChat
         private void OcrLoop()
         {
             obs.ConnectAsync(obsWebsocketUrl.Text, obsWebsocketPassword.Text);
+            obs.Connected += onObsConnected;
             while (true)
             {
                 Thread.Sleep(1000);
                 try
                 {
-                    if (obs.IsConnected)
+                    int sourceCount = 0;
+                    Invoke((MethodInvoker)delegate
                     {
-                        string screenshot = obs.GetSourceScreenshot("image.png", "png").Replace("data:image/png;base64,", "");
+                        sourceCount = obsSourceSelector.Items.Count;
+                    });
+                    if (obs.IsConnected && sourceCount > 0)
+                    {
+                        string selectedSource = "";
+                        Invoke((MethodInvoker)delegate
+                        {
+                            selectedSource = obsSourceSelector.SelectedItem != null ? obsSourceSelector.SelectedItem.ToString() : "";
+                        });
+                        string screenshot = obs.GetSourceScreenshot(selectedSource, "png").Replace("data:image/png;base64,", "");
                         Rectangle cropRect = new Rectangle(1554, 863, 303, 91);
                         MemoryStream pngStream = new MemoryStream(Convert.FromBase64String(screenshot));
                         using (Bitmap src = Image.FromStream(pngStream) as Bitmap)
@@ -159,9 +172,42 @@ namespace ObsOcrToChat
                 }
                 catch (Exception e)
                 {
-                    MessageBox.Show(string.Concat(e.GetType(), ": ", e.Message, Environment.NewLine, Environment.NewLine, e.StackTrace));
+                    string messageBoxString = string.Concat(e.Message, Environment.NewLine, Environment.NewLine, e.StackTrace);
+                    if (!messageBoxString.Contains("Failed to render screenshot")) // we don't wan't to pop an error message, if you accidentally select an audio source...
+                    {
+                        MessageBox.Show(messageBoxString, e.GetType().ToString());
+                    }
                 }
             }
+        }
+
+        private void onObsConnected(object sender, EventArgs e)
+        {
+            setSceneCollection();
+        }
+
+        private void setSceneCollection()
+        {
+            List<OBSWebsocketDotNet.Types.SceneBasicInfo> sceneCollection = obs.ListScenes();
+            List<string> sourceCollection = new List<string>();
+            foreach (OBSWebsocketDotNet.Types.SceneBasicInfo scene in sceneCollection)
+            {
+                List<SceneItemDetails> sources = new List<SceneItemDetails>();
+                sources.AddRange(obs.GetSceneItemList(scene.Name));
+                sourceCollection.Add(scene.Name);
+                foreach (SceneItemDetails source in sources)
+                {
+                    sourceCollection.Add(source.SourceName);
+                }
+            }
+            BeginInvoke((MethodInvoker)delegate
+            {
+                obsSourceSelector.Items.AddRange(sourceCollection.ToArray());
+                if (!string.IsNullOrEmpty(Settings.Default.ObsSceneSelected))
+                {
+                    obsSourceSelector.SelectedIndex = obsSourceSelector.FindStringExact(Settings.Default.ObsSceneSelected);
+                }
+            });
         }
 
         private void Form1_FormClosed(object sender, FormClosedEventArgs e)
@@ -182,6 +228,12 @@ namespace ObsOcrToChat
             Settings.Default.ObsWebsocketPassword = obsWebsocketPassword.Text;
             Settings.Default.Save();
             obs.ConnectAsync(obsWebsocketUrl.Text, obsWebsocketPassword.Text);
+        }
+
+        private void ObsSourceSelector_SelectionChangeCommitted(object sender, EventArgs e)
+        {
+            Settings.Default.ObsSceneSelected = obsSourceSelector.SelectedItem.ToString();
+            Settings.Default.Save();
         }
     }
 }

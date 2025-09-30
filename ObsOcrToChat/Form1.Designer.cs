@@ -37,6 +37,8 @@
             obsSaveButton = new Button();
             githubLink = new LinkLabel();
             picturePreview = new PictureBox();
+            obsSourceSelector = new ComboBox();
+            obsSourceLabel = new Label();
             ((System.ComponentModel.ISupportInitialize)picturePreview).BeginInit();
             SuspendLayout();
             // 
@@ -118,17 +120,37 @@
             // 
             // picturePreview
             // 
-            picturePreview.Location = new Point(12, 149);
+            picturePreview.Location = new Point(12, 177);
             picturePreview.Name = "picturePreview";
-            picturePreview.Size = new Size(438, 185);
+            picturePreview.Size = new Size(438, 157);
             picturePreview.TabIndex = 8;
             picturePreview.TabStop = false;
+            // 
+            // obsSourceSelector
+            // 
+            obsSourceSelector.FormattingEnabled = true;
+            obsSourceSelector.Location = new Point(96, 148);
+            obsSourceSelector.Name = "obsSourceSelector";
+            obsSourceSelector.Size = new Size(312, 23);
+            obsSourceSelector.TabIndex = 9;
+            obsSourceSelector.SelectionChangeCommitted += ObsSourceSelector_SelectionChangeCommitted;
+            // 
+            // obsSourceLabel
+            // 
+            obsSourceLabel.AutoSize = true;
+            obsSourceLabel.Location = new Point(47, 151);
+            obsSourceLabel.Name = "obsSourceLabel";
+            obsSourceLabel.Size = new Size(43, 15);
+            obsSourceLabel.TabIndex = 10;
+            obsSourceLabel.Text = "Source";
             // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(464, 361);
+            Controls.Add(obsSourceLabel);
+            Controls.Add(obsSourceSelector);
             Controls.Add(picturePreview);
             Controls.Add(githubLink);
             Controls.Add(obsSaveButton);
@@ -157,5 +179,7 @@
         private Button obsSaveButton;
         private LinkLabel githubLink;
         private PictureBox picturePreview;
+        private ComboBox obsSourceSelector;
+        private Label obsSourceLabel;
     }
 }
