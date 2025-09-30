@@ -231,7 +231,12 @@ namespace ObsOcrToChat
             obs.ConnectAsync(obsWebsocketUrl.Text, obsWebsocketPassword.Text);
         }
 
+        // todo: fix, both of these have the strange behavior of updating the selection when the combobox is still open and the element hovered on
         private void ObsSourceSelector_SelectionChangeCommitted(object sender, EventArgs e)
+        {
+
+        }
+        private void ObsSourceSelector_SelectedIndexChanged(object sender, EventArgs e)
         {
             Settings.Default.ObsSceneSelected = obsSourceSelector.SelectedItem.ToString();
             Settings.Default.Save();

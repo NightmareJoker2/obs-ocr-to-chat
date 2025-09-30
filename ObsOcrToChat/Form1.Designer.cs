@@ -134,6 +134,7 @@
             obsSourceSelector.Size = new Size(312, 23);
             obsSourceSelector.TabIndex = 9;
             obsSourceSelector.SelectionChangeCommitted += ObsSourceSelector_SelectionChangeCommitted;
+            obsSourceSelector.SelectedIndexChanged += ObsSourceSelector_SelectedIndexChanged;
             // 
             // obsSourceLabel
             // 
