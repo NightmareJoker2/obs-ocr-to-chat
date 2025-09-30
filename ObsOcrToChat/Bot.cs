@@ -20,11 +20,11 @@ namespace ObsOcrToChat
 {
     internal class Bot
     {
-        TwitchClient client = new TwitchClient();
+        TwitchClient client;
         TwitchAPI api = new TwitchAPI();
         string clientId = "muk6gd4m3t7cp23e6842gibjlaau66";
         public string userName = null;
-        public bool isConnected { get { return client.IsConnected; } }
+        public bool isConnected { get { return client == null ? false : client.IsConnected; } }
 
         public Bot()
         {
@@ -33,7 +33,7 @@ namespace ObsOcrToChat
 
         public async void Authenticate()
         {
-            if (!client.IsConnected)
+            if (!isConnected)
             {
                 Authentication auth = new Authentication();
                 auth.SendRequestToBrowser(clientId);
