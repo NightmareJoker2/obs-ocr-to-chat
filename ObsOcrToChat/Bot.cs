@@ -72,6 +72,12 @@ namespace ObsOcrToChat
             client.JoinChannel(userName);
         }
 
+        public void Disconnect()
+        {
+            client.Disconnect();
+            userName = null;
+        }
+
         public void Send(string message)
         {
             client.SendMessage(client.JoinedChannels.First(), message);

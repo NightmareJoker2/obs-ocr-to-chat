@@ -1,3 +1,4 @@
+using ObsOcrToChat.Properties;
 using OBSWebsocketDotNet;
 using System.Threading.Tasks;
 using Tesseract;
@@ -38,6 +39,22 @@ namespace ObsOcrToChat
             ocrThread.Start();
         }
 
+        private void AuthenticateButton_MouseEnter(object sender, EventArgs e)
+        {
+            if (!string.IsNullOrEmpty(bot.userName))
+            {
+                AuthenticateButton.Text = "Disconnect";
+            }
+        }
+
+        private void AuthenticateButton_MouseLeave(object sender, EventArgs e)
+        {
+            if (!string.IsNullOrEmpty(bot.userName))
+            {
+                AuthenticateButton.Text = bot.userName;
+            }
+        }
+
         private async void AuthenticateButton_Click(object sender, EventArgs e)
         {
             if (string.IsNullOrEmpty(bot.userName))
@@ -60,6 +77,18 @@ namespace ObsOcrToChat
                         });
                     }
                 });
+            }
+            else
+            {
+                AuthenticateButton.Enabled = false;
+                AuthenticateButton.Text = "Disconnecting...";
+                Settings.Default.AccessToken = null;
+                if (bot.isConnected)
+                {
+                    bot.Disconnect();
+                }
+                AuthenticateButton.Text = "Connect";
+                AuthenticateButton.Enabled = true;
             }
         }
 

@@ -41,6 +41,8 @@
             AuthenticateButton.TabIndex = 0;
             AuthenticateButton.Text = "Authenticate";
             AuthenticateButton.UseVisualStyleBackColor = true;
+            AuthenticateButton.MouseEnter += AuthenticateButton_MouseEnter;
+            AuthenticateButton.MouseLeave += AuthenticateButton_MouseLeave;
             AuthenticateButton.Click += AuthenticateButton_Click;
             // 
             // PagerTextbox
