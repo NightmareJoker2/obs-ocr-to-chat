@@ -46,7 +46,10 @@ namespace ObsOcrToChat
                 if (!string.IsNullOrEmpty(bot.userName))
                 {
                     await Task.Delay(500);
-                    AuthenticateButton.Text = bot.userName;
+                    BeginInvoke((MethodInvoker)delegate
+                    {
+                        AuthenticateButton.Text = bot.userName;
+                    });
                 }
             }
         }
