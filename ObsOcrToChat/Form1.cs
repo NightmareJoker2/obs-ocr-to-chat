@@ -223,6 +223,7 @@ namespace ObsOcrToChat
 
         private void obsSaveButton_Click(object sender, EventArgs e)
         {
+            obsSourceSelector.Items.Clear();
             obs.Disconnect();
             Settings.Default.ObsWebsocketUrl = obsWebsocketUrl.Text;
             Settings.Default.ObsWebsocketPassword = obsWebsocketPassword.Text;
