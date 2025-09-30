@@ -71,6 +71,7 @@
             Text = "OBS OCR to Chat";
             ResumeLayout(false);
             PerformLayout();
+            FormClosed += Form1_FormClosed;
         }
 
         #endregion

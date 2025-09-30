@@ -112,5 +112,11 @@ namespace ObsOcrToChat
                 }
             }
         }
+
+        private void Form1_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            Application.Exit(); // stays open for some reason after this... weird
+            System.Environment.Exit(0);
+        }
     }
 }
