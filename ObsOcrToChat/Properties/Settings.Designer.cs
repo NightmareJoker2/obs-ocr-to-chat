@@ -46,5 +46,29 @@ namespace ObsOcrToChat.Properties {
                 this["RefreshToken"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string ObsWebsocketUrl {
+            get {
+                return ((string)(this["ObsWebsocketUrl"]));
+            }
+            set {
+                this["ObsWebsocketUrl"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string ObsWebsocketPassword {
+            get {
+                return ((string)(this["ObsWebsocketPassword"]));
+            }
+            set {
+                this["ObsWebsocketPassword"] = value;
+            }
+        }
     }
 }

@@ -1,6 +1,11 @@
 using ObsOcrToChat.Properties;
 using OBSWebsocketDotNet;
+using System.Diagnostics;
+using System.Drawing;
+using System.Drawing.Imaging;
+using System.Security.Policy;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 using Tesseract;
 using TwitchLib.Client;
 
@@ -32,6 +37,9 @@ namespace ObsOcrToChat
                 AuthenticateButton.Text = "Connect";
             }
             AuthenticateButton.Enabled = true;
+
+            obsWebsocketUrl.Text = !string.IsNullOrEmpty(Settings.Default.ObsWebsocketUrl) ? Settings.Default.ObsWebsocketUrl : "ws://127.0.0.1:4455/";
+            obsWebsocketPassword.Text = !string.IsNullOrEmpty(Settings.Default.ObsWebsocketPassword) ? Settings.Default.ObsWebsocketPassword : "";
 
             obs = new OBSWebsocket();
 
@@ -94,50 +102,64 @@ namespace ObsOcrToChat
 
         private void OcrLoop()
         {
-            obs.ConnectAsync("ws://127.0.0.1:4455/", "");
+            obs.ConnectAsync(obsWebsocketUrl.Text, obsWebsocketPassword.Text);
             while (true)
             {
                 Thread.Sleep(1000);
-                string screenshot = obs.GetSourceScreenshot("image.png", "png").Replace("data:image/png;base64,", "");
-                Rectangle cropRect = new Rectangle(1554, 863, 303, 91);
-                MemoryStream pngStream = new MemoryStream(Convert.FromBase64String(screenshot));
-                using (Bitmap src = Image.FromStream(pngStream) as Bitmap)
+                try
                 {
-                    using (Bitmap target = new Bitmap(cropRect.Width, cropRect.Height))
+                    if (obs.IsConnected)
                     {
-                        using (Graphics g = Graphics.FromImage(target))
+                        string screenshot = obs.GetSourceScreenshot("image.png", "png").Replace("data:image/png;base64,", "");
+                        Rectangle cropRect = new Rectangle(1554, 863, 303, 91);
+                        MemoryStream pngStream = new MemoryStream(Convert.FromBase64String(screenshot));
+                        using (Bitmap src = Image.FromStream(pngStream) as Bitmap)
                         {
-                            g.DrawImage(src, new Rectangle(0, 0, target.Width, target.Height), cropRect, GraphicsUnit.Pixel);
-                            pngStream = new MemoryStream();
-                            target.Save(pngStream, System.Drawing.Imaging.ImageFormat.Bmp);
+                            using (Bitmap target = new Bitmap(cropRect.Width, cropRect.Height))
+                            {
+                                using (Graphics g = Graphics.FromImage(target))
+                                {
+                                    g.DrawImage(src, new Rectangle(0, 0, target.Width, target.Height), cropRect, GraphicsUnit.Pixel);
+                                    pngStream = new MemoryStream();
+                                    target.Save(pngStream, System.Drawing.Imaging.ImageFormat.Bmp);
+                                    BeginInvoke((MethodInvoker)delegate
+                                    {
+                                        picturePreview.Image = Image.FromStream(pngStream);
+                                    });
+                                }
+                            }
+                        }
+                        string ocrResult;
+                        using (TesseractEngine engine = new TesseractEngine(@"./tessdata", "eng", EngineMode.Default))
+                        {
+                            using (Pix img = Pix.LoadFromMemory(pngStream.ToArray()))
+                            {
+                                using (Page page = engine.Process(img))
+                                {
+                                    ocrResult = page.GetText();
+                                }
+                            }
+                        }
+                        if (!string.IsNullOrWhiteSpace(ocrResult))
+                        {
+                            ocrResult = ocrResult.Trim();
+                            if (PagerTextbox.Text.Trim() != ocrResult)
+                            {
+                                BeginInvoke((MethodInvoker)delegate
+                                {
+                                    PagerTextbox.Text = ocrResult;
+                                });
+                                if (bot.isConnected)
+                                {
+                                    bot.Send(string.Concat("📟 Detected Message: ", ocrResult, " 📟"));
+                                }
+                            }
                         }
                     }
                 }
-                string ocrResult;
-                using (TesseractEngine engine = new TesseractEngine(@"./tessdata", "eng", EngineMode.Default))
+                catch (Exception e)
                 {
-                    using (Pix img = Pix.LoadFromMemory(pngStream.ToArray()))
-                    {
-                        using (Page page = engine.Process(img))
-                        {
-                            ocrResult = page.GetText();
-                        }
-                    }
-                }
-                if (!string.IsNullOrWhiteSpace(ocrResult))
-                {
-                    ocrResult = ocrResult.Trim();
-                    if (PagerTextbox.Text.Trim() != ocrResult)
-                    {
-                        BeginInvoke((MethodInvoker)delegate
-                        {
-                            PagerTextbox.Text = ocrResult;
-                        });
-                        if (bot.isConnected)
-                        {
-                            bot.Send(string.Concat("📟 Detected Message: ", ocrResult, " 📟"));
-                        }
-                    }
+                    MessageBox.Show(string.Concat(e.GetType(), ": ", e.Message, Environment.NewLine, Environment.NewLine, e.StackTrace));
                 }
             }
         }
@@ -146,6 +168,20 @@ namespace ObsOcrToChat
         {
             Application.Exit(); // stays open for some reason after this... weird
             System.Environment.Exit(0);
+        }
+
+        private void githubLink_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            Process.Start(new ProcessStartInfo { FileName = "https://github.com/NightmareJoker2/obs-ocr-to-chat/", UseShellExecute = true });
+        }
+
+        private void obsSaveButton_Click(object sender, EventArgs e)
+        {
+            obs.Disconnect();
+            Settings.Default.ObsWebsocketUrl = obsWebsocketUrl.Text;
+            Settings.Default.ObsWebsocketPassword = obsWebsocketPassword.Text;
+            Settings.Default.Save();
+            obs.ConnectAsync(obsWebsocketUrl.Text, obsWebsocketPassword.Text);
         }
     }
 }
