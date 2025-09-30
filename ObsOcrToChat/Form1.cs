@@ -21,7 +21,7 @@ namespace ObsOcrToChat
             AuthenticateButton.Enabled = false;
             AuthenticateButton.Text = "Loading...";
             bot = new Bot();
-            await Task.Delay(500);
+            await Task.Delay(1200);
             if (!string.IsNullOrEmpty(bot.userName))
             {
                 AuthenticateButton.Text = bot.userName;
@@ -42,15 +42,24 @@ namespace ObsOcrToChat
         {
             if (string.IsNullOrEmpty(bot.userName))
             {
+                AuthenticateButton.Enabled = false;
+                AuthenticateButton.Text = "Authenticating...";
                 await Task.Run(() => bot.Authenticate());
-                if (!string.IsNullOrEmpty(bot.userName))
+                await Task.Run(async () =>
                 {
-                    await Task.Delay(500);
-                    BeginInvoke((MethodInvoker)delegate
+                    while (string.IsNullOrEmpty(bot.userName))
                     {
-                        AuthenticateButton.Text = bot.userName;
-                    });
-                }
+                        await Task.Delay(200);
+                    }
+                    if (!string.IsNullOrEmpty(bot.userName))
+                    {
+                        BeginInvoke((MethodInvoker)delegate
+                        {
+                            AuthenticateButton.Text = bot.userName;
+                            AuthenticateButton.Enabled = true;
+                        });
+                    }
+                });
             }
         }
 
